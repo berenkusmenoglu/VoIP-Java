@@ -37,20 +37,18 @@ public class SoundReceiver {
         }
 
         boolean running = true;
-       
+        AudioPlayer player = new AudioPlayer();
         while (running) {
 
             try {
-                 
-                //Receive a DatagramPacket (note that the string cant be more than 80 chars)
-                 byte[] buffer = new byte[256];
-                
-                     DatagramPacket packet = new DatagramPacket(buffer, 0, 256);
-                 receiving_socket.receive(packet);
-               
-            
 
-                AudioPlayer player = new AudioPlayer();
+                //Receive a DatagramPacket (note that the string cant be more than 80 chars)
+                byte[] buffer = new byte[256];
+
+                DatagramPacket packet = new DatagramPacket(buffer, 0, 256);
+                receiving_socket.receive(packet);
+
+               
 
                 player.playBlock(packet.getData());
 
