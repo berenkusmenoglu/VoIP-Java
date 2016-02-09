@@ -80,9 +80,7 @@ public class VoiceSenderThread implements Runnable {
                 e.printStackTrace();
                 System.exit(0);
             }
-            
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            
+
             AudioRecorder recorder = new AudioRecorder();
             boolean running = true;
             while (running) {

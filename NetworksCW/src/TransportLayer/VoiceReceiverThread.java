@@ -84,9 +84,6 @@ public class VoiceReceiverThread implements Runnable {
                     
                     DatagramPacket packet = new DatagramPacket(buffer, 0, 256);
                     receiving_socket.receive(packet);
-                    
-                    
-                    
                     player.playBlock(packet.getData());
                     
                 } catch (IOException e) {
