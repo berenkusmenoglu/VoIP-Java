@@ -10,6 +10,8 @@ package TransportLayer;
  * @author abj
  */
 import AudioLayer.AudioManager;
+import CMPC3M06.AudioPlayer;
+import static TransportLayer.SoundReceiver.receiving_socket;
 import java.net.*;
 import java.io.*;
 import java.util.Vector;
@@ -41,61 +43,63 @@ public class VoiceReceiverThread implements Runnable {
     @Override
     public void run() {
 
-        //Port to open socket on
-        int PORT = 8000;
-
-        //Open a socket to receive from on port PORT
         try {
-            switch (socketType) {
-                case Type0:
-                    receiving_socket = new DatagramSocket(PORT);
-                    break;
-                case Type1:
-                    receiving_socket = new DatagramSocket2(PORT);
-                    break;
-                case Type2:
-                    receiving_socket = new DatagramSocket3(PORT);
-                    break;
-                case Type3:
-                    receiving_socket = new DatagramSocket4(PORT);
-                    break;
-
-            }
-
-        } catch (SocketException e) {
-            System.out.println("ERROR: TextReceiver: Could not open UDP socket to receive from.");
-            e.printStackTrace();
-            System.exit(0);
-        }
-
-        boolean running = true;
-
-        while (running) {
-
+            
+            //Port to open socket on
+            int PORT = 8000;
+            
+            //Open a socket to receive from on port PORT
             try {
-
-                byte[] buffer = new byte[1000];
-                DatagramPacket packet = new DatagramPacket(buffer, 0, 80);
-
-                receiving_socket.receive(packet);
-
-                String str = new String(buffer);
-
-                if (!str.isEmpty()) {
-                    System.out.print(str.trim());
+                switch (socketType) {
+                    case Type0:
+                        receiving_socket = new DatagramSocket(PORT);
+                        break;
+                    case Type1:
+                        receiving_socket = new DatagramSocket2(PORT);
+                        break;
+                    case Type2:
+                        receiving_socket = new DatagramSocket3(PORT);
+                        break;
+                    case Type3:
+                        receiving_socket = new DatagramSocket4(PORT);
+                        break;
+                        
                 }
-
-                if (str.substring(0, 4).equalsIgnoreCase("EXIT")) {
-                    running = false;
-                }
-
-            } catch (IOException e) {
-                System.out.println("ERROR: TextReceiver: Some random IO error occured!");
+                
+            } catch (SocketException e) {
+                System.out.println("ERROR: TextReceiver: Could not open UDP socket to receive from.");
                 e.printStackTrace();
+                System.exit(0);
             }
+            
+            boolean running = true;
+            AudioPlayer player = new AudioPlayer();
+            while (running) {
+                
+                try {
+                    
+                    
+                    //Receive a DatagramPacket (note that the string cant be more than 80 chars)
+                    byte[] buffer = new byte[256];
+                    
+                    DatagramPacket packet = new DatagramPacket(buffer, 0, 256);
+                    receiving_socket.receive(packet);
+                    
+                    
+                    
+                    player.playBlock(packet.getData());
+                    
+                } catch (IOException e) {
+                    System.out.println("ERROR: TextReceiver: Some random IO error occured!");
+                    e.printStackTrace();
+                }
+            }
+            //Close the socket
+            receiving_socket.close();
+            
+        } catch (LineUnavailableException ex) {
+            Logger.getLogger(VoiceReceiverThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //Close the socket
-        receiving_socket.close();
 
     }
 }
