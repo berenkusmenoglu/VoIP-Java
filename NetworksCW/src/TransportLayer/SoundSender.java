@@ -10,7 +10,6 @@ package TransportLayer;
  * @author abj
  */
 import AudioLayer.AudioManager;
-import CMPC3M06.AudioRecorder;
 import Others.*;
 import VoIPLayer.VoIPManager;
 import java.net.*;
@@ -61,22 +60,41 @@ public class SoundSender {
 
         //***************************************************
         //Main loop.
-        boolean running = true;
-        AudioRecorder recorder = new AudioRecorder();
-        while (running) {
-            try {
+        //boolean running = true;
+        // while(running)        {
+        try {
 
-                
-                byte[] buffer = recorder.getBlock();
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
+            Vector<byte[]> recordedAudio = audioManager.RecordAudio(5);
+            System.out.println("Recording complete.");
+
+            //voIPManager.intsToBytes(ints)
+            //Read in a string from the standard input
+           // String str = in.readLine();
+            //Convert it to an array of bytes
+            //byte[] buffer = str.getBytes();
+            //Make a DatagramPacket from it, with client address and port number
+            // DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
+            for (byte[] recordedAudio1 : recordedAudio) {
+
+                DatagramPacket packet = new DatagramPacket(recordedAudio1, recordedAudio1.length, clientIP, PORT);
+ System.out.println("Sending packet" + recordedAudio1.toString());
+                //Send it
                 sending_socket.send(packet);
 
-           
-            } catch (IOException e) {
-                System.out.println("ERROR: TextSender: Some random IO error occured!");
-                e.printStackTrace();
+               
+
+                    //The user can type EXIT to quit
+                //   if (str.equals("EXIT")) {
+                //   running = false;
+                //}
             }
+            System.out.println("Packets sent, exiting.");
+
+        } catch (IOException e) {
+            System.out.println("ERROR: TextSender: Some random IO error occured!");
+            e.printStackTrace();
         }
+       // }
 
         //Close the socket
         sending_socket.close();
