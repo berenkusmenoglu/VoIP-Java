@@ -10,6 +10,7 @@ package TransportLayer;
  * @author abj
  */
 import AudioLayer.AudioManager;
+import CMPC3M06.AudioRecorder;
 import Others.*;
 import VoIPLayer.VoIPManager;
 import java.net.*;
@@ -43,7 +44,7 @@ public class SoundSender {
         //Open a socket to send from
         //We dont need to know its port number as we never send anything to it.
         //We need the try and catch block to make sure no errors occur.
-        //DatagramSocket sending_socket;
+   
         try {
             sending_socket = new DatagramSocket();
         } catch (SocketException e) {
@@ -51,50 +52,25 @@ public class SoundSender {
             e.printStackTrace();
             System.exit(0);
         }
-        //***************************************************
 
         //***************************************************
-        //Get a handle to the Standard Input (console) so we can read user input
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        //***************************************************
+        //Main loop.  
+        AudioRecorder recorder = new AudioRecorder();
+        boolean running = true;
+        while (running) {
+            try {
 
-        //***************************************************
-        //Main loop.
-        //boolean running = true;
-        // while(running)        {
-        try {
+              
 
-            Vector<byte[]> recordedAudio = audioManager.RecordAudio(5);
-            System.out.println("Recording complete.");
-
-            //voIPManager.intsToBytes(ints)
-            //Read in a string from the standard input
-           // String str = in.readLine();
-            //Convert it to an array of bytes
-            //byte[] buffer = str.getBytes();
-            //Make a DatagramPacket from it, with client address and port number
-            // DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
-            for (byte[] recordedAudio1 : recordedAudio) {
-
-                DatagramPacket packet = new DatagramPacket(recordedAudio1, recordedAudio1.length, clientIP, PORT);
- System.out.println("Sending packet" + recordedAudio1.toString());
-                //Send it
+                byte[] buffer = recorder.getBlock();
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
                 sending_socket.send(packet);
 
-               
-
-                    //The user can type EXIT to quit
-                //   if (str.equals("EXIT")) {
-                //   running = false;
-                //}
+            } catch (IOException e) {
+                System.out.println("ERROR: TextSender: Some random IO error occured!");
+                e.printStackTrace();
             }
-            System.out.println("Packets sent, exiting.");
-
-        } catch (IOException e) {
-            System.out.println("ERROR: TextSender: Some random IO error occured!");
-            e.printStackTrace();
         }
-       // }
 
         //Close the socket
         sending_socket.close();
