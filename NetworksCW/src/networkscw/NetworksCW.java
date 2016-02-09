@@ -42,10 +42,10 @@ public class NetworksCW {
 
         ReadyThreads(Type0);
         //RecordingTest();
-        //RunVoiceThreads();
+        RunVoiceThreads();
         //RunTextThreads();
         
-        RecordingTest();
+        //RecordingTest();
         
 
     }
