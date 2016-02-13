@@ -65,6 +65,7 @@ public class VoiceReceiverThread implements Runnable {
                         break;
                         
                 }
+                System.out.println(socketType);
                 
             } catch (SocketException e) {
                 System.out.println("ERROR: TextReceiver: Could not open UDP socket to receive from.");
@@ -78,11 +79,11 @@ public class VoiceReceiverThread implements Runnable {
                 
                 try {
                     
-                    
                     //Receive a DatagramPacket (note that the string cant be more than 80 chars)
-                    byte[] buffer = new byte[256];
+                    int bufferSize = 500;
+                    byte[] buffer = new byte[bufferSize];
                     
-                    DatagramPacket packet = new DatagramPacket(buffer, 0, 256);
+                    DatagramPacket packet = new DatagramPacket(buffer, 0, bufferSize);
                     receiving_socket.receive(packet);
                     player.playBlock(packet.getData());
                     

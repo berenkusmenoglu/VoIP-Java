@@ -10,6 +10,7 @@ package TransportLayer;
  * @author abj
  */
 import AudioLayer.AudioManager;
+import CMPC3M06.AudioPlayer;
 import CMPC3M06.AudioRecorder;
 import static TransportLayer.SoundSender.sending_socket;
 import java.net.*;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 import javax.sound.sampled.LineUnavailableException;
 import networkscw.NetworksCW.SocketType;
 import static networkscw.NetworksCW.SocketType.*;
+import static sun.audio.AudioPlayer.player;
 import uk.ac.uea.cmp.voip.DatagramSocket2;
 import uk.ac.uea.cmp.voip.DatagramSocket3;
 import uk.ac.uea.cmp.voip.DatagramSocket4;
@@ -83,6 +85,7 @@ public class VoiceSenderThread implements Runnable {
 
             AudioRecorder recorder = new AudioRecorder();
             boolean running = true;
+            AudioPlayer player = new AudioPlayer();
             while (running) {
                 try {
                     
@@ -91,6 +94,10 @@ public class VoiceSenderThread implements Runnable {
                     byte[] buffer = recorder.getBlock();
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
                     sending_socket.send(packet);
+                    
+               
+                  //  player.playBlock(packet.getData());
+                    
                 } catch (IOException e) {
                     System.out.println("ERROR: TextSender: Some random IO error occured!");
                     e.printStackTrace();
