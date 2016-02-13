@@ -12,6 +12,7 @@ package TransportLayer;
 import AudioLayer.AudioManager;
 import CMPC3M06.AudioPlayer;
 import static TransportLayer.SoundReceiver.receiving_socket;
+import VoIPLayer.VoIPManager;
 import java.net.*;
 import java.io.*;
 import java.util.Vector;
@@ -28,13 +29,14 @@ public class VoiceReceiverThread implements Runnable {
 
     static DatagramSocket receiving_socket;
     private SocketType socketType = Type0;
+    VoIPManager voIPManager = new VoIPManager();
 
     public VoiceReceiverThread(SocketType type) {
         this.socketType = type;
     }
 
     AudioManager audioManager = new AudioManager();
-
+int PORT = 8000;
     public void start() {
         Thread thread = new Thread(this);
         thread.start();
@@ -46,10 +48,11 @@ public class VoiceReceiverThread implements Runnable {
         try {
             
             //Port to open socket on
-            int PORT = 8000;
+            
             
             //Open a socket to receive from on port PORT
             try {
+                
                 switch (socketType) {
                     case Type0:
                         receiving_socket = new DatagramSocket(PORT);
@@ -80,9 +83,9 @@ public class VoiceReceiverThread implements Runnable {
                 try {
                     
                     //Receive a DatagramPacket (note that the string cant be more than 80 chars)
-                    int bufferSize = 500;
+                    int bufferSize = 512;
                     byte[] buffer = new byte[bufferSize];
-                    
+                    //DatagramPacket packet = voIPManager.ReceiveVoice(buffer, bufferSize);
                     DatagramPacket packet = new DatagramPacket(buffer, 0, bufferSize);
                     receiving_socket.receive(packet);
                     player.playBlock(packet.getData());
@@ -100,4 +103,11 @@ public class VoiceReceiverThread implements Runnable {
         }
 
     }
+
+    @Override
+    public String toString() {
+        return "VoiceReceiverThread{" + "socketType=" + socketType + ", voIPManager=" + voIPManager + ", audioManager=" + audioManager + ", PORT=" + PORT + '}';
+    }
+    
+    
 }

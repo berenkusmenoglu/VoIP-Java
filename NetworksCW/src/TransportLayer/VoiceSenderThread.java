@@ -13,6 +13,7 @@ import AudioLayer.AudioManager;
 import CMPC3M06.AudioPlayer;
 import CMPC3M06.AudioRecorder;
 import static TransportLayer.SoundSender.sending_socket;
+import VoIPLayer.VoIPManager;
 import java.net.*;
 import java.io.*;
 import java.util.logging.Level;
@@ -20,7 +21,6 @@ import java.util.logging.Logger;
 import javax.sound.sampled.LineUnavailableException;
 import networkscw.NetworksCW.SocketType;
 import static networkscw.NetworksCW.SocketType.*;
-import static sun.audio.AudioPlayer.player;
 import uk.ac.uea.cmp.voip.DatagramSocket2;
 import uk.ac.uea.cmp.voip.DatagramSocket3;
 import uk.ac.uea.cmp.voip.DatagramSocket4;
@@ -29,8 +29,11 @@ public class VoiceSenderThread implements Runnable {
 
     static DatagramSocket sending_socket;
     private final AudioManager audioManager = new AudioManager();
-
+    VoIPManager voIPManager = new VoIPManager();
     private SocketType socketType = Type0;
+    AudioRecorder recorder ;
+     private int PORT = 8000;
+  InetAddress clientIP = null;
 
     public VoiceSenderThread(SocketType type) {
         this.socketType = type;
@@ -47,9 +50,9 @@ public class VoiceSenderThread implements Runnable {
         try {
             
             //Port to send to
-            int PORT = 8000;
+           
             //IP ADDRESS to send to
-            InetAddress clientIP = null;
+           
             try {
                 clientIP = InetAddress.getByName("localhost");  //CHANGE localhost to IP or NAME of client machine
             } catch (UnknownHostException e) {
@@ -61,46 +64,25 @@ public class VoiceSenderThread implements Runnable {
             //Open a socket to send from
             //We dont need to know its port number as we never send anything to it.
             try {
-                switch (socketType) {
-                    case Type0:
-                        sending_socket = new DatagramSocket();
-                        break;
-                    case Type1:
-                        sending_socket = new DatagramSocket2();
-                        break;
-                    case Type2:
-                        sending_socket = new DatagramSocket3();
-                        break;
-                    case Type3:
-                        sending_socket = new DatagramSocket4();
-                        break;
-                        
-                }
                 
+                voIPManager.setSocketType(socketType);
+
             } catch (SocketException e) {
                 System.out.println("ERROR: TextSender: Could not open UDP socket to send from.");
-                e.printStackTrace();
                 System.exit(0);
             }
 
-            AudioRecorder recorder = new AudioRecorder();
+            
             boolean running = true;
-            AudioPlayer player = new AudioPlayer();
+            recorder = new AudioRecorder();
             while (running) {
                 try {
-                    
-                    
-                    
+                      
                     byte[] buffer = recorder.getBlock();
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
-                    sending_socket.send(packet);
-                    
-               
-                  //  player.playBlock(packet.getData());
+                    voIPManager.TransmitVoice(PORT, buffer, clientIP);   
                     
                 } catch (IOException e) {
                     System.out.println("ERROR: TextSender: Some random IO error occured!");
-                    e.printStackTrace();
                 }
             }
             //Close the socket
@@ -111,4 +93,10 @@ public class VoiceSenderThread implements Runnable {
         }
 
     }
+
+    @Override
+    public String toString() {
+        return "VoiceSenderThread{"  + ", voIPManager=" + voIPManager + ", socketType=" + socketType + ", recorder=" + recorder + ", PORT=" + PORT + ", clientIP=" + clientIP + '}';
+    }
+    
 }

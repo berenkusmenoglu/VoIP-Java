@@ -44,7 +44,6 @@ public class NetworksCW {
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();
-        
         //RecordingTest();
         
 
@@ -56,6 +55,7 @@ public class NetworksCW {
     private static void RunVoiceThreads() {
         voiceReceiver.start();
         voiceSender.start();
+
     }
 
     /**
