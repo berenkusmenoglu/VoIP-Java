@@ -16,6 +16,7 @@ import static TransportLayer.SoundSender.sending_socket;
 import VoIPLayer.VoIPManager;
 import java.net.*;
 import java.io.*;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.LineUnavailableException;
@@ -31,9 +32,9 @@ public class VoiceSenderThread implements Runnable {
     private final AudioManager audioManager = new AudioManager();
     VoIPManager voIPManager = new VoIPManager();
     private SocketType socketType = Type0;
-    AudioRecorder recorder ;
-     private int PORT = 8000;
-  InetAddress clientIP = null;
+    AudioRecorder recorder;
+    private int PORT = 8000;
+    InetAddress clientIP = null;
 
     public VoiceSenderThread(SocketType type) {
         this.socketType = type;
@@ -48,11 +49,9 @@ public class VoiceSenderThread implements Runnable {
     public void run() {
 
         try {
-            
+
             //Port to send to
-           
             //IP ADDRESS to send to
-           
             try {
                 clientIP = InetAddress.getByName("localhost");  //CHANGE localhost to IP or NAME of client machine
             } catch (UnknownHostException e) {
@@ -60,11 +59,11 @@ public class VoiceSenderThread implements Runnable {
                 e.printStackTrace();
                 System.exit(0);
             }
-            
+
             //Open a socket to send from
             //We dont need to know its port number as we never send anything to it.
             try {
-                
+
                 voIPManager.setSocketType(socketType);
 
             } catch (SocketException e) {
@@ -72,22 +71,32 @@ public class VoiceSenderThread implements Runnable {
                 System.exit(0);
             }
 
-            
             boolean running = true;
             recorder = new AudioRecorder();
+            long startTime = 0;
+            startTime = System.currentTimeMillis();
             while (running) {
                 try {
-                      
+
                     byte[] buffer = recorder.getBlock();
-                    voIPManager.TransmitVoice(PORT, buffer, clientIP);   
-                    
+
+                    voIPManager.TransmitVoice(PORT, buffer, clientIP);
+
+                  //  if(((System.currentTimeMillis() - startTime)/1000) == 5)
+                    //{
+                    ///   running = false;
+                    //}
+                    // System.out.println( (System.currentTimeMillis() - startTime)/1000 );
                 } catch (IOException e) {
                     System.out.println("ERROR: TextSender: Some random IO error occured!");
                 }
             }
             //Close the socket
+            long finishTime = System.currentTimeMillis();
+
+            System.out.println("That took: " + (finishTime - startTime) + " ms");
             sending_socket.close();
-            
+
         } catch (LineUnavailableException ex) {
             Logger.getLogger(VoiceSenderThread.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -96,7 +105,7 @@ public class VoiceSenderThread implements Runnable {
 
     @Override
     public String toString() {
-        return "VoiceSenderThread{"  + ", voIPManager=" + voIPManager + ", socketType=" + socketType + ", recorder=" + recorder + ", PORT=" + PORT + ", clientIP=" + clientIP + '}';
+        return "VoiceSenderThread{" + ", voIPManager=" + voIPManager + ", socketType=" + socketType + ", recorder=" + recorder + ", PORT=" + PORT + ", clientIP=" + clientIP + '}';
     }
-    
+
 }

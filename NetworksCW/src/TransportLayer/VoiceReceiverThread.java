@@ -15,6 +15,8 @@ import static TransportLayer.SoundReceiver.receiving_socket;
 import VoIPLayer.VoIPManager;
 import java.net.*;
 import java.io.*;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,7 +90,12 @@ int PORT = 8000;
                     //DatagramPacket packet = voIPManager.ReceiveVoice(buffer, bufferSize);
                     DatagramPacket packet = new DatagramPacket(buffer, 0, bufferSize);
                     receiving_socket.receive(packet);
+                    //use a ring buffer
+                   
+                    //final Queue<Object> q = new ArrayDeque<>();
+                   // q.add(packet);
                     player.playBlock(packet.getData());
+                   // q.poll();
                     
                 } catch (IOException e) {
                     System.out.println("ERROR: TextReceiver: Some random IO error occured!");

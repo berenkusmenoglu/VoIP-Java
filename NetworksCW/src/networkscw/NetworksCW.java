@@ -5,7 +5,10 @@ import Others.TextReceiverThread;
 import TransportLayer.VoiceSenderThread;
 import TransportLayer.VoiceReceiverThread;
 import AudioLayer.AudioManager;
+import VoIPLayer.VoIPManager;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.sound.sampled.LineUnavailableException;
@@ -22,6 +25,13 @@ public class NetworksCW {
     private static TextSenderThread sender;
     private static VoiceReceiverThread voiceReceiver;
     private static VoiceSenderThread voiceSender;
+    private static final VoIPManager voipManager = new VoIPManager();
+
+    private static final int PORT = 8000;
+    private static InetAddress clientIP; ;
+
+  
+   
 
     /**
      * For testing with different DataSockets.
@@ -40,12 +50,13 @@ public class NetworksCW {
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
 
-        ReadyThreads(Type0);
+        ReadyThreads(Type3);
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();
         //RecordingTest();
-        
+        //PacketTest(Type1,100);
+    
 
     }
 
@@ -93,18 +104,28 @@ public class NetworksCW {
     static void RecordingTest() throws LineUnavailableException, IOException {
         Vector<byte[]> recordedAudio = audioManager.RecordAudio(5);
         //audioManager.PlayAudio(recordedAudio);
-    
+
         for (byte[] recordedAudio1 : recordedAudio) {
-            
+
             for (int i = 0; i < recordedAudio1.length; i++) {
-                     System.out.print(recordedAudio1[i]);
-               }
-            
-           System.out.println("\n");
-       
+                System.out.print(recordedAudio1[i]);
+            }
+
+            System.out.println("\n");
+
         }
-           
-           
+
     }
+
+    private static void PacketTest(SocketType type, int testCount) throws IOException {
+        
+        NetworksCW.clientIP = InetAddress.getByName("localhost");
+        
+        voipManager.setSocketType(type);
+        voipManager.sendDummyPacket(PORT, clientIP, testCount);
+        
+    }
+  
+
 
 }
