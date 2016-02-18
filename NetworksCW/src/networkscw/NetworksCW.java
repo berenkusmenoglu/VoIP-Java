@@ -53,7 +53,7 @@ public class NetworksCW {
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
 
-        ReadyThreads(Type3);
+        ReadyThreads(Type1);
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();
