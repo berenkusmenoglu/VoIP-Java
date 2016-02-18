@@ -36,7 +36,7 @@ public class TextReceiverThread implements Runnable {
     public void run() {
 
         //Port to open socket on
-        int PORT = 8000;
+        int PORT = 55555;
 
         //Open a socket to receive from on port PORT
         try {
@@ -70,7 +70,7 @@ public class TextReceiverThread implements Runnable {
                 //Receive a DatagramPacket (note that the string cant be more than 80 chars)
                 byte[] buffer = new byte[80];
                 DatagramPacket packet = new DatagramPacket(buffer, 0, 80);
-
+                System.out.println(new String(packet.getData()));
                 receiving_socket.receive(packet);
 
                 //Get a string from the byte buffer
@@ -94,3 +94,6 @@ public class TextReceiverThread implements Runnable {
 
     }
 }
+
+
+// 139.222.6.6

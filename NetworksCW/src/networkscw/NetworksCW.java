@@ -8,7 +8,9 @@ import AudioLayer.AudioManager;
 import VoIPLayer.VoIPManager;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Vector;
 import javax.sound.sampled.LineUnavailableException;
@@ -28,8 +30,9 @@ public class NetworksCW {
     private static final VoIPManager voipManager = new VoIPManager();
 
     private static final int PORT = 8000;
-    private static InetAddress clientIP; ;
+    private static InetAddress clientIP;
 
+  
   
    
 
@@ -56,8 +59,9 @@ public class NetworksCW {
         //RunTextThreads();
         //RecordingTest();
         //PacketTest(Type1,100);
-    
-
+         
+        
+       
     }
 
     /**
@@ -103,7 +107,6 @@ public class NetworksCW {
      */
     static void RecordingTest() throws LineUnavailableException, IOException {
         Vector<byte[]> recordedAudio = audioManager.RecordAudio(5);
-        //audioManager.PlayAudio(recordedAudio);
 
         for (byte[] recordedAudio1 : recordedAudio) {
 
@@ -117,15 +120,6 @@ public class NetworksCW {
 
     }
 
-    private static void PacketTest(SocketType type, int testCount) throws IOException {
-        
-        NetworksCW.clientIP = InetAddress.getByName("localhost");
-        
-        voipManager.setSocketType(type);
-        voipManager.sendDummyPacket(PORT, clientIP, testCount);
-        
-    }
-  
-
+ 
 
 }

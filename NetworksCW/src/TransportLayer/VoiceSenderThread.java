@@ -33,7 +33,7 @@ public class VoiceSenderThread implements Runnable {
     VoIPManager voIPManager = new VoIPManager();
     private SocketType socketType = Type0;
     AudioRecorder recorder;
-    private int PORT = 8000;
+    private final int PORT = 55555;
     InetAddress clientIP = null;
 
     public VoiceSenderThread(SocketType type) {
@@ -64,7 +64,7 @@ public class VoiceSenderThread implements Runnable {
             //We dont need to know its port number as we never send anything to it.
             try {
 
-                voIPManager.setSocketType(socketType);
+                voIPManager.setSocketType(socketType, 's');
 
             } catch (SocketException e) {
                 System.out.println("ERROR: TextSender: Could not open UDP socket to send from.");
@@ -73,28 +73,23 @@ public class VoiceSenderThread implements Runnable {
 
             boolean running = true;
             recorder = new AudioRecorder();
-            long startTime = 0;
-            startTime = System.currentTimeMillis();
+      
+            int i = 0;
             while (running) {
                 try {
 
                     byte[] buffer = recorder.getBlock();
 
-                    voIPManager.TransmitVoice(PORT, buffer, clientIP);
-
-                  //  if(((System.currentTimeMillis() - startTime)/1000) == 5)
-                    //{
-                    ///   running = false;
-                    //}
-                    // System.out.println( (System.currentTimeMillis() - startTime)/1000 );
+                    voIPManager.TransmitVoice(PORT, buffer, clientIP, i);
+                    i++;
+                 
+            
                 } catch (IOException e) {
                     System.out.println("ERROR: TextSender: Some random IO error occured!");
                 }
             }
             //Close the socket
-            long finishTime = System.currentTimeMillis();
-
-            System.out.println("That took: " + (finishTime - startTime) + " ms");
+    
             sending_socket.close();
 
         } catch (LineUnavailableException ex) {
