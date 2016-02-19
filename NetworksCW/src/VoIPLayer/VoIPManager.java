@@ -239,9 +239,9 @@ public class VoIPManager {
     int expected = 0;
     int error = 0;
     int sortInterval = 10;
+    int currentID = 0;
     ArrayList<CustomPacket> listToSort = new ArrayList<CustomPacket>();
 
-    int compare = 1;
     CustomPacket previous = new CustomPacket(0, new byte[512]);
 
     public void ReceiveVoice(byte[] buffer, int bufferSize) throws IOException {
@@ -255,44 +255,42 @@ public class VoIPManager {
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
 
         int packetNumber = (int) current.getPacketID();
-        int type = 1;
+        int type = 2;
         //System.out.println("Packet number: " + cp.packetID + " - " + expected);
 
         if (type == 0) {
             player.playBlock(arrayToPlay);
         } else if (type == 1) {
 
+            //FILLING THE GAPS UNTILL PACKET NUMBER MATCHES EXPECTED
             while (expected <= packetNumber) {
 
-                System.out.println("BEFORE Packet number: " + current.toString() + " - expected: " + expected);
                 //MISSING PACKETS FIX
                 if (current.packetID == expected) {
-                //System.out.println("PREVIOUS BECOMES CURRENT ");
+
                     //PREVIOUS BECOMES CURRENT
                     previous = current;
                     previous.setPacketID(expected);
 
                 } else {
-                 //System.out.println("CURRENT BECOMES PREVIVOUS");
+
                     //CURRENT BECOMES PREVIVOUS
                     current = previous;
-                    current.setPacketID(previous.getPacketID() );
 
                 }
 
                 //PLAY CURRENT
+                System.out.println("Playing " + current.packetID);
                 player.playBlock(current.getPacketData());
-                System.out.println("AFTER Packet number: " + current.toString() + " - " + expected + "\n");
+
                 expected++;
             }
 
         } else if (type == 2) {
-            ///////////////////////////////
-            //System.out.println("Packet No: " + getNumberFromBuffer(packet.getData()) + " expected: " + expected);
-            if (expected > 0) {
-                listToSort.add(current);
-            }
 
+            //ADD CURRENT PACKET TO THE LIST
+            listToSort.add(current);
+            expected++;
             if (expected % sortInterval == 0 && expected > 0) {
 
                 //SORTING THE ARRAY
@@ -301,20 +299,49 @@ public class VoIPManager {
                 //FIXING PACKET LOSS
                 for (int a = 0; a < listToSort.size(); a++) {
 
-                    //player.playBlock(listToSort.get(a).packetData);
-                    compare++;
+                   // System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
+
+                    /////////////////////
+                    while (currentID <= listToSort.get(a).packetID) {
+                    System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
+                        //MISSING PACKETS FIX
+                        if (listToSort.get(a).packetID == currentID) {
+
+                            //System.out.println(listToSort.get(a).packetID);
+                            //PREVIOUS BECOMES CURRENT
+                            previous = listToSort.get(a);
+                            previous.setPacketID(currentID);
+
+                        } else {
+
+                            //CURRENT BECOMES PREVIVOUS
+                           
+                            listToSort.add(a, previous);
+
+                        }
+                        System.out.println(listToSort.get(a) + "\n");
+
+                        currentID++;
+                    }
+                     ////////////////////
+
+                   
+
                 }
-
+     
                 //PLAYING SORTED ARRAY
-                for (int a = 0; a < listToSort.size(); a++) {
+                for (int b = 0; b < listToSort.size(); b++) {
 
-                    //player.playBlock(listToSort.get(a).packetData);
-                    compare++;
+                    //System.out.println("Playing :" + listToSort.get(b).packetID);
+                    player.playBlock(listToSort.get(b).packetData);
+
                 }
 
                 //CLEARING THE LIST
                 listToSort.clear();
+
             }
+
         } else if (type == 3) {
             //CORRUPT PACKETS
         }
