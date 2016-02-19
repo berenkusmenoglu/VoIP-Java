@@ -249,14 +249,15 @@ public class VoIPManager {
         DatagramPacket packet = new DatagramPacket(buffer, 0, bufferSize);
 
         receivingSocket.receive(packet);
+        
+       
 
         byte[] arrayToPlay = stripPacket(packet.getData());
 
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
 
         int packetNumber = (int) current.getPacketID();
-        int type = 2;
-        //System.out.println("Packet number: " + cp.packetID + " - " + expected);
+        int type = 1;
 
         if (type == 0) {
             player.playBlock(arrayToPlay);
@@ -280,7 +281,7 @@ public class VoIPManager {
                 }
 
                 //PLAY CURRENT
-                System.out.println("Playing " + current.packetID);
+               // System.out.println("Playing " + current.packetID);
                 player.playBlock(current.getPacketData());
 
                 expected++;
@@ -299,15 +300,13 @@ public class VoIPManager {
                 //FIXING PACKET LOSS
                 for (int a = 0; a < listToSort.size(); a++) {
 
-                   // System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
-
-                    /////////////////////
+       
                     while (currentID <= listToSort.get(a).packetID) {
                     System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
                         //MISSING PACKETS FIX
                         if (listToSort.get(a).packetID == currentID) {
 
-                            //System.out.println(listToSort.get(a).packetID);
+                     
                             //PREVIOUS BECOMES CURRENT
                             previous = listToSort.get(a);
                             previous.setPacketID(currentID);
@@ -319,11 +318,11 @@ public class VoIPManager {
                             listToSort.add(a, previous);
 
                         }
-                        System.out.println(listToSort.get(a) + "\n");
+                        //System.out.println(listToSort.get(a) + "\n");
 
                         currentID++;
                     }
-                     ////////////////////
+           
 
                    
 
@@ -332,7 +331,7 @@ public class VoIPManager {
                 //PLAYING SORTED ARRAY
                 for (int b = 0; b < listToSort.size(); b++) {
 
-                    //System.out.println("Playing :" + listToSort.get(b).packetID);
+                   // System.out.println("Playing :" + listToSort.get(b).packetID);
                     player.playBlock(listToSort.get(b).packetData);
 
                 }
@@ -343,7 +342,29 @@ public class VoIPManager {
             }
 
         } else if (type == 3) {
-            //CORRUPT PACKETS
+            
+       
+                //MISSING PACKETS FIX
+                if (current.packetID == expected) {
+
+                    //PREVIOUS BECOMES CURRENT
+                    previous = current;
+                    previous.setPacketID(expected);
+
+                } else {
+
+                    //CURRENT BECOMES PREVIVOUS
+                    current = previous;
+
+                }
+
+                //PLAY CURRENT
+                System.out.println("Playing " + current.toString());
+                player.playBlock(current.getPacketData());
+
+                expected++;
+       
+          
         }
 
         ///////////////////////////////
