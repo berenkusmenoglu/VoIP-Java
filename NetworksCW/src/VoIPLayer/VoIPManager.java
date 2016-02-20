@@ -31,7 +31,7 @@ public class VoIPManager {
     private SocketType type;
 
     public VoIPManager(SocketType type) {
-         this.type = type;
+         this.type = SocketType.Type0;
     }
 
  
@@ -242,7 +242,7 @@ public class VoIPManager {
      */
     public void fixVoice(SocketType type, DatagramPacket packet) throws IOException {
         
-        System.out.println(type);
+        //sSystem.out.println(type);
         
         byte[] arrayToPlay = stripPacket(packet.getData());
 
