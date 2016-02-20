@@ -31,10 +31,11 @@ public class VoiceReceiverThread implements Runnable {
 
     static DatagramSocket receiving_socket;
     private SocketType socketType = Type0;
-    VoIPManager voIPManager = new VoIPManager();
+    VoIPManager voIPManager;
 
 
     public VoiceReceiverThread(SocketType type) {
+        this.voIPManager = new VoIPManager(socketType);
         this.socketType = type;
     }
 
@@ -55,7 +56,7 @@ public class VoiceReceiverThread implements Runnable {
             //Open a socket to receive from on port PORT
             try {
 
-                voIPManager.setSocketType(socketType, 'r');
+                voIPManager.readySocket(socketType, 'r');
 
             } catch (SocketException e) {
                 System.out.println("ERROR: TextReceiver: Could not open UDP socket to receive from.");

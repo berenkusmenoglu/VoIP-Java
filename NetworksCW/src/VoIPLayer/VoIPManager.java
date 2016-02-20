@@ -25,13 +25,23 @@ public class VoIPManager {
     private boolean interleave = false;
     private int interleaveNumber = 16;
     private ArrayList<CustomPacket> packetsToSend = new ArrayList<CustomPacket>(interleaveNumber);
+    private DatagramSocket sendingSocket;
+    private DatagramSocket receivingSocket;
+    private AudioPlayer player;
     private SocketType type;
 
-    public VoIPManager() {
-         type = SocketType.Type0;
+    public VoIPManager(SocketType type) {
+         this.type = type;
     }
 
-    private void interLeavePackets(ArrayList<CustomPacket> packetsToSend) {
+ 
+
+    public void setType(SocketType type) {
+        this.type = type;
+    }
+    
+
+    private void interleavePackets(ArrayList<CustomPacket> packetsToSend) {
 
         int n = (int) Math.sqrt(packetsToSend.size());
 
@@ -103,9 +113,7 @@ public class VoIPManager {
         }
 
         public DatagramPacket getPacket(InetAddress clientIP, int PORT) {
-            DatagramPacket aPacket = new DatagramPacket(this.packetData, this.packetData.length, clientIP, PORT);
-
-            return aPacket;
+            return new DatagramPacket(this.packetData, this.packetData.length, clientIP, PORT);
         }
 
         @Override
@@ -129,13 +137,8 @@ public class VoIPManager {
 
     }
 
-    DatagramSocket sendingSocket;
-    DatagramSocket receivingSocket;
-    AudioPlayer player;
 
-    byte[] currentBuffer;
-    ArrayList receivedPackets = new ArrayList();
-
+   
     /**
      *
      * @param socketType
@@ -143,7 +146,7 @@ public class VoIPManager {
      * @throws SocketException
      * @throws javax.sound.sampled.LineUnavailableException
      */
-    public void setSocketType(SocketType socketType, char a) throws SocketException, LineUnavailableException {
+    public void readySocket(SocketType socketType, char a) throws SocketException, LineUnavailableException {
         player = new AudioPlayer();
         switch (socketType) {
             case Type0:
@@ -238,7 +241,9 @@ public class VoIPManager {
      * @throws java.io.IOException
      */
     public void fixVoice(SocketType type, DatagramPacket packet) throws IOException {
-
+        
+        System.out.println(type);
+        
         byte[] arrayToPlay = stripPacket(packet.getData());
 
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
@@ -247,10 +252,10 @@ public class VoIPManager {
 
         switch (type) {
             case Type0:
-
+                     player.playBlock(current.getPacketData());
                 break;
             case Type1:
-
+              
                 while (expected <= packetNumber) {
 
                     //MISSING PACKETS FIX
@@ -385,7 +390,7 @@ public class VoIPManager {
 
             if (number % interleaveNumber == 0) {
 
-                interLeavePackets(packetsToSend);
+                interleavePackets(packetsToSend);
 
                 //SENDING LIST
                 for (CustomPacket packetsToSend1 : packetsToSend) {

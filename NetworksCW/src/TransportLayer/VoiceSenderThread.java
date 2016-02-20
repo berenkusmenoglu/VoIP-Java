@@ -30,13 +30,14 @@ public class VoiceSenderThread implements Runnable {
 
     static DatagramSocket sending_socket;
     private final AudioManager audioManager = new AudioManager();
-    VoIPManager voIPManager = new VoIPManager();
+    VoIPManager voIPManager;
     private SocketType socketType = Type0;
     AudioRecorder recorder;
     private final int PORT = 55555;
     InetAddress clientIP = null;
 
     public VoiceSenderThread(SocketType type) {
+        this.voIPManager = new VoIPManager(socketType);
         this.socketType = type;
     }
 
@@ -64,7 +65,7 @@ public class VoiceSenderThread implements Runnable {
             //We dont need to know its port number as we never send anything to it.
             try {
 
-                voIPManager.setSocketType(socketType, 's');
+                voIPManager.readySocket(socketType, 's');
 
             } catch (SocketException e) {
                 System.out.println("ERROR: TextSender: Could not open UDP socket to send from.");
