@@ -30,7 +30,7 @@ import uk.ac.uea.cmp.voip.DatagramSocket4;
 public class VoiceReceiverThread implements Runnable {
 
     static DatagramSocket receiving_socket;
-    private SocketType socketType = Type0;
+    private SocketType socketType = Type1;
     VoIPManager voIPManager;
 
 

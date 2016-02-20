@@ -25,7 +25,7 @@ public class TextSenderThread implements Runnable {
 
     
     static DatagramSocket sending_socket;
-    private NetworksCW.SocketType socketType = Type0;
+    private NetworksCW.SocketType socketType = Type1;
 
     boolean UIenabled;
 
@@ -57,16 +57,16 @@ public class TextSenderThread implements Runnable {
         //DatagramSocket sending_socket;
         try {
            switch (socketType) {
-                case Type0:
+                case Type1:
                    sending_socket = new DatagramSocket();
                     break;
-                case Type1:
+                case Type2:
                     sending_socket = new DatagramSocket2();
                     break;
-                case Type2:
+                case Type3:
                     sending_socket = new DatagramSocket3();
                     break;
-                case Type3:
+                case Type4:
                     sending_socket = new DatagramSocket4();
                     break;
 

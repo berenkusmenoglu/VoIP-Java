@@ -31,7 +31,7 @@ public class VoiceSenderThread implements Runnable {
     static DatagramSocket sending_socket;
     private final AudioManager audioManager = new AudioManager();
     VoIPManager voIPManager;
-    private SocketType socketType = Type0;
+    private SocketType socketType = Type1;
     AudioRecorder recorder;
     private final int PORT = 55555;
     InetAddress clientIP = null;

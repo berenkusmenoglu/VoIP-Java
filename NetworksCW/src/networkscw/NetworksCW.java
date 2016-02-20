@@ -27,7 +27,7 @@ public class NetworksCW {
     private static TextSenderThread sender;
     private static VoiceReceiverThread voiceReceiver;
     private static VoiceSenderThread voiceSender;
-    private static final VoIPManager voipManager = new VoIPManager(Type0);
+    private static final VoIPManager voipManager = new VoIPManager(Type2);
 
     private static final int PORT = 8000;
     private static InetAddress clientIP;
@@ -41,10 +41,10 @@ public class NetworksCW {
      */
     public enum SocketType {
 
-        Type0,
         Type1,
         Type2,
-        Type3;
+        Type3,
+        Type4;
     }
 
     /* @param args the command line arguments
@@ -53,12 +53,12 @@ public class NetworksCW {
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
       
-        ReadyThreads(Type0);
+        ReadyThreads(Type2);
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();
         //RecordingTest();
-        //PacketTest(Type1,100);
+        //PacketTest(Type2,100);
          
         
        
@@ -92,6 +92,7 @@ public class NetworksCW {
      */
     static void ReadyThreads(SocketType type) {
 
+        voipManager.setType(type);
         voiceReceiver = new VoiceReceiverThread(type);
         voiceSender = new VoiceSenderThread(type);
         receiver = new TextReceiverThread(type);

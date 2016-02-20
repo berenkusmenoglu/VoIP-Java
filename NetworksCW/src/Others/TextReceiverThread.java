@@ -25,7 +25,7 @@ public class TextReceiverThread implements Runnable {
     }
 
     static DatagramSocket receiving_socket;
-    private NetworksCW.SocketType socketType = Type0;
+    private NetworksCW.SocketType socketType = Type1;
 
     public void start() {
         Thread thread = new Thread(this);
@@ -41,16 +41,16 @@ public class TextReceiverThread implements Runnable {
         //Open a socket to receive from on port PORT
         try {
             switch (socketType) {
-                case Type0:
+                case Type1:
                     receiving_socket = new DatagramSocket(PORT);
                     break;
-                case Type1:
+                case Type2:
                     receiving_socket = new DatagramSocket2(PORT);
                     break;
-                case Type2:
+                case Type3:
                     receiving_socket = new DatagramSocket3(PORT);
                     break;
-                case Type3:
+                case Type4:
                     receiving_socket = new DatagramSocket4(PORT);
                     break;
 

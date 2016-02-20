@@ -31,8 +31,8 @@ public class NetworksUI extends javax.swing.JFrame {
         this.textToSend2 = "";
         this.recordLength = 0;
         this.audioManager = new AudioManager();
-        this.trd = new TextReceiverThread(NetworksCW.SocketType.Type0);
-        this.tsd = new TextSenderThread(NetworksCW.SocketType.Type0);
+        this.trd = new TextReceiverThread(NetworksCW.SocketType.Type1);
+        this.tsd = new TextSenderThread(NetworksCW.SocketType.Type1);
         initComponents();
         startThreads();
     }
