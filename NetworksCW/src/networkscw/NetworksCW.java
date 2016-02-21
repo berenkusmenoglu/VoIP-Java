@@ -8,10 +8,6 @@ import AudioLayer.AudioManager;
 import VoIPLayer.VoIPManager;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Vector;
 import javax.sound.sampled.LineUnavailableException;
 import static networkscw.NetworksCW.SocketType.*;
@@ -27,7 +23,7 @@ public class NetworksCW {
     private static TextSenderThread sender;
     private static VoiceReceiverThread voiceReceiver;
     private static VoiceSenderThread voiceSender;
-    private static final VoIPManager voipManager = new VoIPManager(Type2);
+    private static final VoIPManager voipManager = new VoIPManager(Type1);
 
     private static final int PORT = 8000;
     private static InetAddress clientIP;
@@ -53,7 +49,7 @@ public class NetworksCW {
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
       
-        ReadyThreads(Type2);
+        ReadyThreads(Type1);
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();

@@ -22,8 +22,8 @@ import uk.ac.uea.cmp.voip.DatagramSocket4;
  */
 public class VoIPManager {
 
-    private boolean interleave = true;
-    private int interleaveNumber = 16;
+    private final boolean interleave = true;
+    private final int interleaveNumber = 16;
     private ArrayList<CustomPacket> packetsToSend = new ArrayList<CustomPacket>(interleaveNumber);
     private DatagramSocket sendingSocket;
     private DatagramSocket receivingSocket;
@@ -250,6 +250,7 @@ public class VoIPManager {
             case Type1:
                 player.playBlock(current.getPacketData());
                 break;
+                
             case Type2:
                
                 byte[] empty = new byte[512];
@@ -410,7 +411,7 @@ public class VoIPManager {
      */
     public void TransmitVoice(int PORT, byte[] buffer, InetAddress clientIP, int number) throws IOException {
 
-        if (interleave) {
+        if (interleave && type == SocketType.Type2) {
 
             buffer = giveNumberToBuffer(buffer, number);
 
