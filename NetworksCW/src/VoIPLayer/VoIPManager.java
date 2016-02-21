@@ -31,7 +31,7 @@ public class VoIPManager {
     private SocketType type;
 
     public VoIPManager(SocketType type) {
-        this.type = SocketType.Type2;
+        this.type = SocketType.Type1;
     }
 
     public void setType(SocketType type) {
@@ -247,6 +247,7 @@ public class VoIPManager {
         int packetNumber = (int) current.getPacketID();
 
         switch (type) {
+            
             case Type1:
                 player.playBlock(current.getPacketData());
                 break;
@@ -435,6 +436,7 @@ public class VoIPManager {
 
         } else {
 
+            System.out.println("asd");
             buffer = giveNumberToBuffer(buffer, number);
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
@@ -465,6 +467,7 @@ public class VoIPManager {
         receivingSocket.receive(packet);
 
         fixVoice(type, packet);
+        
 
         ///////////////////////////////
         /*TEST
