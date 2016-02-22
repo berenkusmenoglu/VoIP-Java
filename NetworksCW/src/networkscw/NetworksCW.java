@@ -23,7 +23,7 @@ public class NetworksCW {
     private static TextSenderThread sender;
     private static VoiceReceiverThread voiceReceiver;
     private static VoiceSenderThread voiceSender;
-    private static final VoIPManager voipManager = new VoIPManager(Type1);
+    private static VoIPManager voipManager;
 
     private static final int PORT = 8000;
     private static InetAddress clientIP;
@@ -49,7 +49,7 @@ public class NetworksCW {
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
       
-        ReadyThreads(Type1);
+        ReadyThreads(Type2);
         //RecordingTest();
         RunVoiceThreads();
         //RunTextThreads();
@@ -87,8 +87,8 @@ public class NetworksCW {
      * @param type
      */
     static void ReadyThreads(SocketType type) {
+        voipManager = new VoIPManager(type);          
 
-        voipManager.setType(type);
         voiceReceiver = new VoiceReceiverThread(type);
         voiceSender = new VoiceSenderThread(type);
         receiver = new TextReceiverThread(type);

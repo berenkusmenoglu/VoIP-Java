@@ -10,35 +10,28 @@ package TransportLayer;
  * @author abj
  */
 import AudioLayer.AudioManager;
-import CMPC3M06.AudioPlayer;
 import CMPC3M06.AudioRecorder;
-import static TransportLayer.SoundSender.sending_socket;
 import VoIPLayer.VoIPManager;
 import java.net.*;
 import java.io.*;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.LineUnavailableException;
 import networkscw.NetworksCW.SocketType;
 import static networkscw.NetworksCW.SocketType.*;
-import uk.ac.uea.cmp.voip.DatagramSocket2;
-import uk.ac.uea.cmp.voip.DatagramSocket3;
-import uk.ac.uea.cmp.voip.DatagramSocket4;
-
 public class VoiceSenderThread implements Runnable {
 
     static DatagramSocket sending_socket;
     private final AudioManager audioManager = new AudioManager();
     VoIPManager voIPManager;
-    private SocketType socketType = Type1;
+    private SocketType socketType;
     AudioRecorder recorder;
     private final int PORT = 55555;
     InetAddress clientIP = null;
 
-    public VoiceSenderThread(SocketType type) {
+    public VoiceSenderThread(SocketType socketType) {
         this.voIPManager = new VoIPManager(socketType);
-        this.socketType = type;
+        this.socketType = socketType;
     }
 
     public void start() {

@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import javax.sound.sampled.LineUnavailableException;
@@ -23,6 +24,8 @@ import uk.ac.uea.cmp.voip.DatagramSocket4;
 public class VoIPManager {
 
     private final boolean interleave = true;
+    private final boolean repetitionMethod = true;
+
     private final int interleaveNumber = 16;
     private ArrayList<CustomPacket> packetsToSend = new ArrayList<CustomPacket>(interleaveNumber);
     private DatagramSocket sendingSocket;
@@ -31,16 +34,20 @@ public class VoIPManager {
     private SocketType type;
 
     public VoIPManager(SocketType type) {
-        this.type = SocketType.Type1;
+        this.type = type;
     }
 
     public void setType(SocketType type) {
         this.type = type;
     }
 
-    private void interleavePackets(ArrayList<CustomPacket> packetsToSend) {
+    public SocketType getType() {
+        return this.type;
+    }
 
-        int n = (int) Math.sqrt(packetsToSend.size());
+    private ArrayList<CustomPacket> interleavePackets(ArrayList<CustomPacket> packetsList) {
+
+        int n = (int) Math.sqrt(packetsList.size());
 
         CustomPacket[][] arrayToInterleave = new CustomPacket[n][n];
 
@@ -48,7 +55,7 @@ public class VoIPManager {
         int a = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                arrayToInterleave[i][j] = packetsToSend.get(a);
+                arrayToInterleave[i][j] = packetsList.get(a);
                 a++;
 
             }
@@ -73,13 +80,16 @@ public class VoIPManager {
 
             }
         }
-        packetsToSend.clear();
+        
+        packetsList.clear();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
 
-                packetsToSend.add(arrayToInterleave[i][j]);
+                packetsList.add(arrayToInterleave[i][j]);
             }
         }
+        
+        return packetsList;
 
     }
 
@@ -143,6 +153,7 @@ public class VoIPManager {
      */
     public void readySocket(SocketType socketType, char a) throws SocketException, LineUnavailableException {
         player = new AudioPlayer();
+
         switch (socketType) {
             case Type1:
                 if (a == 's') {
@@ -238,56 +249,82 @@ public class VoIPManager {
      * @param packet
      * @throws java.io.IOException
      */
+          int interNum = interleaveNumber;
+          int i = 1;
     public void fixVoice(SocketType type, DatagramPacket packet) throws IOException {
 
         byte[] arrayToPlay = stripPacket(packet.getData());
 
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
-        //System.out.println(current.toString());
+        // System.out.println(type);
         int packetNumber = (int) current.getPacketID();
 
+        byte[] empty = new byte[512];
+        
+        CustomPacket emptyPacket = new CustomPacket(0, empty);
+
         switch (type) {
-            
+
             case Type1:
                 player.playBlock(current.getPacketData());
                 break;
-                
+
             case Type2:
-               
-                byte[] empty = new byte[512];
-                CustomPacket emptyPacket = new CustomPacket(0, empty);
+                
+                
+          
+               /*
+                int sqrt = (int) Math.sqrt(interleaveNumber);
+                
+                if(expected < interNum)
+                {
+                    expected += sqrt;
+                }
+                else if(i < sqrt)
+                {
+                    interNum--;
+                   // System.out.println(interNum);
+                    expected = sqrt - i;
+                    i++;
+                }
+                
+               // System.out.println(expected);
+                
+               */ 
+                
+                
+                
+                
 
                 if (interleave) {
-          
+
                     if (current.packetID != expected) {
-                       
+
                         boolean added = false;
                         for (int i = 0; i < list2.size(); i++) {
-              
+
                             if (list2.get(i).packetID == expected) {
-                                
-                                 
+
+                                // System.out.println(list2.get(i).packetID);
                                 added = list1.add(list2.remove(i));
-                                
+
                             }
                         }
                         if (!added) {
-                           // System.out.println("empty added");
+
                             list2.add(current);
                             emptyPacket.setPacketID(expected);
                             list1.add(emptyPacket);
-                            
+
                         }
-                       
-                        
+
                     } else {
-                        
+
                         list1.add(current);
                     }
 
                     listToSort = list1;
-                    
-                   // listToSort.add(current);
+                    //listToSort.add(current);
 
                     expected++;
 
@@ -296,102 +333,130 @@ public class VoIPManager {
                         Collections.sort(listToSort, new PacketComparator());
 
                         for (CustomPacket listToSort1 : listToSort) {
-                            //System.out.println("\t :" + listToSort1.toString());
+                            System.out.println("\t :" + listToSort1.toString());
                             player.playBlock(listToSort1.packetData);
                         }
-                        System.out.println();
+
+                        // System.out.println();
                         listToSort.clear();
+                        
                     }
                 } else {
-
-                    while (expected <= packetNumber) {
-
-                        //MISSING PACKETS FIX
-                        if (current.packetID == expected) {
-
-                            //PREVIOUS BECOMES CURRENT
-                            previous = current;
-                            previous.setPacketID(expected);
-
-                        } else {
-
-                            //CURRENT BECOMES PREVIVOUS
-                            current = previous;
-
-                        }
-
-                        //PLAY CURRENT
-                        // System.out.println("Playing " + current.packetID);
-                        player.playBlock(current.getPacketData());
-
-                        expected++;
-                    }
+                    System.out.println("\t :" + current.toString());
+                    player.playBlock(current.packetData);
                 }
+
                 break;
             case Type3:
 
-                listToSort.add(current);
-                expected++;
-                if (expected % sortInterval == 0 && expected > 0) {
+                if (!repetitionMethod) {
+                    previous = emptyPacket;
+                    listToSort.add(current);
+                    expected++;
+                    if (expected % sortInterval == 0 && expected > 0) {
 
-                    //SORTING THE ARRAY
-                    Collections.sort(listToSort, new PacketComparator());
+                        //SORTING THE ARRAY
+                        Collections.sort(listToSort, new PacketComparator());
 
-                    //FIXING PACKET LOSS
-                    for (int a = 0; a < listToSort.size(); a++) {
+                        //FIXING PACKET LOSS
+                        for (int a = 0; a < listToSort.size(); a++) {
 
-                        while (currentID <= listToSort.get(a).packetID) {
-                            //   System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
-                            //MISSING PACKETS FIX
-                            if (listToSort.get(a).packetID == currentID) {
+                            while (currentID <= listToSort.get(a).packetID) {
+                                //   System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
+                                //MISSING PACKETS FIX
+                                if (listToSort.get(a).packetID == currentID) {
 
-                                //PREVIOUS BECOMES CURRENT
-                                previous = listToSort.get(a);
-                                previous.setPacketID(currentID);
+                                    //PREVIOUS BECOMES CURRENT
+                                    previous.setPacketID(currentID);
 
-                            } else {
+                                } else {
 
-                                //CURRENT BECOMES PREVIVOUS
-                                listToSort.add(a, previous);
+                                    //CURRENT BECOMES PREVIVOUS
+                                    listToSort.add(a, previous);
 
+                                }
+                                //System.out.println(listToSort.get(a) + "\n");
+
+                                currentID++;
                             }
-                            //System.out.println(listToSort.get(a) + "\n");
 
-                            currentID++;
                         }
 
+                        //PLAYING SORTED ARRAY
+                        for (CustomPacket listToSort1 : listToSort) {
+                            System.out.println("Playing :" + listToSort1.packetID);
+                            player.playBlock(listToSort1.packetData);
+                        }
+
+                        //CLEARING THE LIST
+                        listToSort.clear();
+
                     }
+                } else {
+                    listToSort.add(current);
+                    expected++;
+                    if (expected % sortInterval == 0 && expected > 0) {
 
-                    //PLAYING SORTED ARRAY
-                    for (CustomPacket listToSort1 : listToSort) {
-                        System.out.println("Playing :" + listToSort1.packetID);
-                        player.playBlock(listToSort1.packetData);
+                        //SORTING THE ARRAY
+                        Collections.sort(listToSort, new PacketComparator());
+
+                        //FIXING PACKET LOSS
+                        for (int a = 0; a < listToSort.size(); a++) {
+
+                            while (currentID <= listToSort.get(a).packetID) {
+                                // System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
+                                //MISSING PACKETS FIX
+                                if (listToSort.get(a).packetID == currentID) {
+
+                                    //PREVIOUS BECOMES CURRENT
+                                    previous = listToSort.get(a);
+                                    previous.setPacketID(currentID);
+
+                                } else {
+
+                                    //CURRENT BECOMES PREVIVOUS
+                                    listToSort.add(a, previous);
+
+                                }
+                                //System.out.println(listToSort.get(a) + "\n");
+
+                                currentID++;
+                            }
+
+                        }
+
+                        //PLAYING SORTED ARRAY
+                        for (CustomPacket listToSort1 : listToSort) {
+                            System.out.println("Playing :" + listToSort1.packetID);
+                            player.playBlock(listToSort1.packetData);
+                        }
+
+                        //CLEARING THE LIST
+                        listToSort.clear();
+
                     }
-
-                    //CLEARING THE LIST
-                    listToSort.clear();
-
                 }
 
                 //ADD CURRENT PACKET TO THE LIST
                 break;
             case Type4:
                 //MISSING PACKETS FIX
+                previous = emptyPacket;
+
                 if (current.packetID == expected) {
 
                     //PREVIOUS BECOMES CURRENT
-                    previous = current;
+                 
                     previous.setPacketID(expected);
 
                 } else {
-
                     //CURRENT BECOMES PREVIVOUS
+                  
                     current = previous;
 
                 }
 
                 //PLAY CURRENT
-                //System.out.println("Playing " + current.toString());
                 player.playBlock(current.getPacketData());
 
                 expected++;
@@ -420,9 +485,9 @@ public class VoIPManager {
 
             packetsToSend.add(packetToSend);
 
-            if (number % interleaveNumber == 0) {
+            if ((number % interleaveNumber == 0) && interleave) {
 
-                interleavePackets(packetsToSend);
+                packetsToSend = interleavePackets(packetsToSend);
 
                 //SENDING LIST
                 for (CustomPacket packetsToSend1 : packetsToSend) {
@@ -436,12 +501,12 @@ public class VoIPManager {
 
         } else {
 
-            System.out.println("asd");
             buffer = giveNumberToBuffer(buffer, number);
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
 
             sendingSocket.send(packet);
+          
         }
 
     }
@@ -467,7 +532,6 @@ public class VoIPManager {
         receivingSocket.receive(packet);
 
         fixVoice(type, packet);
-        
 
         ///////////////////////////////
         /*TEST
@@ -480,10 +544,8 @@ public class VoIPManager {
          System.err.println("ERROR IN THE PACKET, error no: " + error );
            
          }
-            
-        
-        
          */
+        ///////////////////////////////
     }
 
 }
