@@ -47,7 +47,7 @@ public class VoiceSenderThread implements Runnable {
             //Port to send to
             //IP ADDRESS to send to
             try {
-                clientIP = InetAddress.getByName("25.82.193.250");  //CHANGE localhost to IP or NAME of client machine
+                clientIP = InetAddress.getByName("localhost");  //CHANGE localhost to IP or NAME of client machine
             } catch (UnknownHostException e) {
                 System.out.println("ERROR: TextSender: Could not find client IP");
                 e.printStackTrace();
@@ -68,7 +68,7 @@ public class VoiceSenderThread implements Runnable {
             boolean running = true;
             recorder = new AudioRecorder();
       
-            int i = 0;
+            int i = 1;
             while (running) {
                 try {
 

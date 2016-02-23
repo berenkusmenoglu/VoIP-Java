@@ -47,3 +47,4 @@ Temporary Items
 .apdisk
 NetworksCW/input.wav
 *.wav
+/NetworksCW/dist/
