@@ -250,11 +250,10 @@ public class VoIPManager {
      * @param packet
      * @throws java.io.IOException
      */
-    
     int frameNo = 0;
-    int addPacketTotal = 0;
+    int addedPacketTotal = 0;
     int currentMax = interleaveNumber;
-    int squareRoot = (int)Math.sqrt(interleaveNumber);
+    int squareRoot = (int) Math.sqrt(interleaveNumber);
     int seqNo = 0;
     int index = 1;
 
@@ -265,7 +264,7 @@ public class VoIPManager {
         byte[] arrayToPlay = stripPacket(packet.getData());
 
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
-        //System.out.println(current);
+        // System.out.println(current);
         int packetNumber = (int) current.getPacketID();
 
         byte[] empty = new byte[512];
@@ -278,29 +277,116 @@ public class VoIPManager {
                 player.playBlock(current.getPacketData());
                 break;
 
-            case Type2:       
-            /*
-                if(expected < currentMax)
-                {
+            case Type2:
+
+                if (expected < currentMax) {
                     expected += squareRoot;
-                }
-                else if(index<squareRoot)
-                {
+                } else if (index < squareRoot) {
                     currentMax--;
-                    expected = squareRoot + (seqNo*interleaveNumber) - index;
-                    index ++;
+                    expected = squareRoot + (seqNo * interleaveNumber) - index;
+                    index++;
                 }
-                
-                if(frameNo % interleaveNumber == 0 && frameNo > 0)
-                {
+
+                if (addedPacketTotal % interleaveNumber == 0 && addedPacketTotal > 0) {
+
                     seqNo++;
                     index = 1;
-                    currentMax = 
+                    currentMax = ((seqNo + 1) * interleaveNumber);
+                    expected = ((seqNo) * interleaveNumber) + squareRoot;
+                    //System.out.println(Arrays.toString(sortArray));
+
+                    for (CustomPacket pck : sortArray) {
+                        
+                        if(pck != null)
+                        {
+                            System.out.println("Playing " + pck);
+                            player.playBlock(pck.packetData);
+                        }
+                            
+                    }
+
+                    sortArray = new CustomPacket[interleaveNumber];
+
                 }
-                frameNo++;
-                
-                System.out.println(expected);
-                    */
+                //System.out.println("expected: " + expected + " - current: " + current.packetID + " added: " + addedPacketTotal + " seqNo: " + seqNo);
+                // END EXPECTED CALCULATION
+                int arrayIndex = expected - (seqNo * interleaveNumber) - 1;
+                if (current.packetID == expected) {
+                    sortArray[arrayIndex] = current;
+                    addedPacketTotal++;
+                } else {
+                    if (sortArray[arrayIndex] == null) {
+
+                        sortArray[arrayIndex] = emptyPacket;
+                        addedPacketTotal++;
+
+                    }
+                    //System.out.println(current.packetID + " " +(seqNo * interleaveNumber) +  " " + addedPacketTotal);
+
+                    // if (addedPacketTotal % 16 != 0 && addedPacketTotal > 0) {
+                    if (current.packetID > ((seqNo + 1) * interleaveNumber) && seqNo > 0) {
+
+                        for (CustomPacket pack : sortArray) {
+                            if (pack == null) {
+                                pack = emptyPacket;
+                                addedPacketTotal++;
+
+                            }
+                        }
+
+                        //PLAY
+                        //seqNo++;
+                        //index = 1;
+                        // currentMax = ((seqNo + 1) * interleaveNumber);
+                        // expected = ((seqNo) * interleaveNumber) + squareRoot;
+                        //System.out.println(Arrays.toString(sortArray));
+                    
+                        for (CustomPacket pck : sortArray) {
+                            
+                            if(pck != null)
+                            {
+                                System.out.println("Playing " + pck);
+                                player.playBlock(pck.packetData);
+                            }
+                              
+                          
+                        }
+
+                        sortArray = new CustomPacket[interleaveNumber];
+
+                        sortArray[(int) current.packetID - ((seqNo + 1) * interleaveNumber) - 1] = current;
+
+                    } else {
+
+                        sortArray[(int) current.packetID - (seqNo * interleaveNumber) - 1] = current;
+                        addedPacketTotal++;
+                    }
+
+                    // }
+                    /*
+                     if (current.packetID > (seqNo * interleaveNumber) && seqNo > 0) {
+                     for (CustomPacket pack : sortArray) {
+                     if (pack == null) {
+                     pack = emptyPacket;
+                     }
+                     }
+
+                     //PLAY
+                        
+                     seqNo++;
+                     index = 1;
+                     currentMax = ((seqNo + 1) * interleaveNumber);
+                     expected = ((seqNo) * interleaveNumber) + squareRoot;
+                     //System.out.println(Arrays.toString(sortArray));
+                     sortArray = new CustomPacket[interleaveNumber];
+
+                     sortArray[(int) current.packetID - (seqNo * interleaveNumber) - 1] = current;
+                     expected += squareRoot;
+
+                     }
+                     */
+                }
+
                 break;
             case Type3:
 
@@ -437,7 +523,7 @@ public class VoIPManager {
 
             CustomPacket packetToSend = new CustomPacket(getNumberFromBuffer(buffer), buffer);
 
-            //System.out.println(packetToSend);
+            // System.out.println(packetToSend);
             packetsToSend.add(packetToSend);
 
             if ((number % interleaveNumber == 0) && interleave) {
@@ -448,7 +534,7 @@ public class VoIPManager {
                 for (CustomPacket packetsToSend1 : packetsToSend) {
 
                     DatagramPacket packet = packetsToSend1.getPacket(clientIP, PORT);
-                    //System.out.println(packetsToSend1.toString());
+                    // System.out.println(packetsToSend1.toString());
                     if (packetToSend.getPacketID() != 0) {
                         sendingSocket.send(packet);
                     }
