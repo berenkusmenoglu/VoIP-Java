@@ -204,7 +204,7 @@ public class VoIPManager {
     public long getNumberFromBuffer(byte[] givenBuffer) {
 
         if (type != SocketType.Type4) {
-            
+
             byte[] longBuffer = new byte[8];
 
             System.arraycopy(givenBuffer, 0, longBuffer, 0, 8);
@@ -212,63 +212,54 @@ public class VoIPManager {
             long packetID = byteArray2Long(longBuffer);
 
             return packetID;
-            
+
         } else {
-            
+
             byte[] longBuffer = new byte[8];
 
             System.arraycopy(givenBuffer, 8, longBuffer, 0, 8);
 
             long packetID = byteArray2Long(longBuffer);
-            
-            //System.out.println("longBuffer : " + Arrays.toString(longBuffer));
 
+            //System.out.println("longBuffer : " + Arrays.toString(longBuffer));
             return packetID;
         }
 
     }
-    
-      public long getTotalFromBuffer(byte[] givenBuffer) {
-          
-           byte[] totalBuffer = new byte[8];
 
-            System.arraycopy(givenBuffer, 0, totalBuffer, 0, 8);
+    public long getTotalFromBuffer(byte[] givenBuffer) {
 
-            long totalNum = byteArray2Long(totalBuffer);
+        byte[] totalBuffer = new byte[8];
 
-            return totalNum;
-      }
+        System.arraycopy(givenBuffer, 0, totalBuffer, 0, 8);
+
+        long totalNum = byteArray2Long(totalBuffer);
+
+        return totalNum;
+    }
 
     public byte[] stripPacket(byte[] givenBuffer) {
 
-        if(type != SocketType.Type4)
-        {
-        byte[] newArray = new byte[givenBuffer.length - 8];
+        if (type != SocketType.Type4) {
+            byte[] newArray = new byte[givenBuffer.length - 8];
 
-        System.arraycopy(givenBuffer, 8, newArray, 0, newArray.length);
+            System.arraycopy(givenBuffer, 8, newArray, 0, newArray.length);
 
-        return newArray;
-        }
-        else
-        {
+            return newArray;
+        } else {
 
+            byte[] newArray = new byte[givenBuffer.length - 16];
 
-        byte[] newArray = new byte[givenBuffer.length - 16];
+            System.arraycopy(givenBuffer, 16, newArray, 0, newArray.length);
 
-        System.arraycopy(givenBuffer, 16, newArray, 0, newArray.length);
-        
        // System.out.println("newArray : " + Arrays.toString(newArray));
-         
-        byte[] totalArray = new byte[8];
+            byte[] totalArray = new byte[8];
 
+            System.arraycopy(givenBuffer, 0, totalArray, 0, totalArray.length);
 
-        System.arraycopy(givenBuffer, 0, totalArray, 0, totalArray.length);
-        
         //System.out.println(Arrays.toString(totalArray));
-
-        return newArray;
+            return newArray;
         }
-        
 
     }
 
@@ -301,23 +292,24 @@ public class VoIPManager {
 
     CustomPacket emptyPacket = new CustomPacket(0, empty);
 
+    CustomPacket prev = null;
+
     public void fixVoice(SocketType type, DatagramPacket packet) throws IOException {
 
         //System.out.println(packet.getData().length);
-        
         long totalNum = getTotalFromBuffer(packet.getData());
-        
+
         //System.out.println("TOTALNM : " + totalNum);
         byte[] arrayToPlay = stripPacket(packet.getData());
-        
+
         CRC32 checker = new CRC32();
-            
+
         checker.update(arrayToPlay);
-            
+
         long comparison = checker.getValue();
         //System.out.println("COMP : " + comparison);
-       // System.out.println(arrayToPlay.length);
-        
+        // System.out.println(arrayToPlay.length);
+
         CustomPacket current = new CustomPacket(getNumberFromBuffer(packet.getData()), arrayToPlay);
 
         switch (type) {
@@ -373,113 +365,47 @@ public class VoIPManager {
 
                 break;
             case Type3:
-/*
-                if (!repetitionMethod) {
 
-                    previous = emptyPacket;
-                    listToSort.add(current);
-                    expected++;
-                    if (expected % sortInterval == 0 && expected > 0) {
-
-                        //SORTING THE ARRAY
-                        Collections.sort(listToSort, new PacketComparator());
-
-                        //FIXING PACKET LOSS
-                        for (int a = 0; a < listToSort.size(); a++) {
-
-                            while (currentID <= listToSort.get(a).packetID) {
-                                //   System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
-                                //MISSING PACKETS FIX
-                                if (listToSort.get(a).packetID == currentID) {
-
-                                    //PREVIOUS BECOMES CURRENT
-                                    previous.setPacketID(currentID);
-
-                                } else {
-
-                                    //CURRENT BECOMES PREVIVOUS
-                                    listToSort.add(a, previous);
-
-                                }
-                                //System.out.println(listToSort.get(a) + "\n");
-
-                                currentID++;
-                            }
-
-                        }
-
-                        //PLAYING SORTED ARRAY
-                        for (CustomPacket listToSort1 : listToSort) {
-                            //System.out.println("Playing :" + listToSort1.packetID);
-                            // player.playBlock(listToSort1.packetData);
-                        }
-
-                        //CLEARING THE LIST
-                        listToSort.clear();
-
+                expected++;
+                
+                if (current.packetID != expected) {
+                    if (prev != null && (prev.packetID - current.packetID == 1)) {  
+                       // System.out.println("playing : " + current.packetID);
+                        player.playBlock(current.packetData);
+                      //  System.out.println("playing : " + prev.packetID);
+                        player.playBlock(prev.packetData);
+                        prev = null;
                     }
+                    else if(prev == null)
+                    {
+                        prev = current;
+                    }
+                    else
+                    {
+                        //System.out.println("playing : " + current.packetID);
+                        player.playBlock(current.packetData);
+                    }
+                   
                 } else {
-                    listToSort.add(current);
-                    expected++;
-                    if (expected % sortInterval == 0 && expected > 0) {
-
-                        //SORTING THE ARRAY
-                        Collections.sort(listToSort, new PacketComparator());
-
-                        //FIXING PACKET LOSS
-                        for (int a = 0; a < listToSort.size(); a++) {
-
-                            while (currentID <= listToSort.get(a).packetID) {
-                                // System.out.println("Packet :" + listToSort.get(a).packetID + " compare : " + currentID);
-                                //MISSING PACKETS FIX
-                                if (listToSort.get(a).packetID == currentID) {
-
-                                    //PREVIOUS BECOMES CURRENT
-                                    previous = listToSort.get(a);
-                                    previous.setPacketID(currentID);
-
-                                } else {
-
-                                    //CURRENT BECOMES PREVIVOUS
-                                    listToSort.add(a, previous);
-
-                                }
-                                //System.out.println(listToSort.get(a) + "\n");
-
-                                currentID++;
-                            }
-
-                        }
-
-                        //PLAYING SORTED ARRAY
-                        for (CustomPacket listToSort1 : listToSort) {
-                            // System.out.println("Playing :" + listToSort1.packetID);
-                            player.playBlock(listToSort1.packetData);
-                        }
-
-                        //CLEARING THE LIST
-                        listToSort.clear();
-
-                    }
+                  //  System.out.println("playing : " + current.packetID);
+                    player.playBlock(current.packetData);
                 }
 
-                //ADD CURRENT PACKET TO THE LIST
-                */
+                
+
+                //System.out.println("Current : " + current);
+
                 break;
 
             case Type4:
-                
-                if(totalNum == comparison)
-                {
+
+                if (totalNum == comparison) {
                     player.playBlock(current.packetData);
                     previous = current;
-                }  
-                else if(previous != null)
-                {
+                } else if (previous != null) {
                     player.playBlock(previous.packetData);
                 }
-                  
-      
+
         }
 
     }
@@ -499,36 +425,32 @@ public class VoIPManager {
     public void TransmitVoice(int PORT, byte[] buffer, InetAddress clientIP, int number) throws IOException {
 
         if (type == SocketType.Type4) {
-            
+
             CRC32 checker = new CRC32();
-            
+
             checker.update(buffer);
-            
+
             long sum = checker.getValue();
-            
+
             buffer = giveNumberToBuffer(buffer, number);
 
             CustomPacket packetToSend = new CustomPacket(getNumberFromBuffer(buffer), buffer);
 
-          
             //System.out.println("BEFORE :" + sum);
             //System.out.println("Sum : " + sum);
             byte[] sumBuffer = long2ByteArray(sum);
 
             byte[] bufferToSend = mergeArrays(sumBuffer, buffer);
-            
+
             packetToSend.setPacketData(bufferToSend);
-            
+
             //System.out.println("bufferToSend : " + Arrays.toString(bufferToSend));
-            
             //System.out.println(packetToSend.packetData.length);
             DatagramPacket newPacket = packetToSend.getPacket(clientIP, PORT);
-            
+
             //System.out.println("bufferToSend : " + Arrays.toString(bufferToSend));
             sendingSocket.send(newPacket);
-        }
-
-        else if (interleave && type == SocketType.Type2) {
+        } else if (interleave && type == SocketType.Type2) {
 
             buffer = giveNumberToBuffer(buffer, number);
 
@@ -560,7 +482,7 @@ public class VoIPManager {
             }
 
         } else {
-   
+
             buffer = giveNumberToBuffer(buffer, number);
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
