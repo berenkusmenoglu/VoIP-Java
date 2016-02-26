@@ -27,7 +27,8 @@ public class TextSender {
         //IP ADDRESS to send to
         InetAddress clientIP = null;
 	try {
-		clientIP = InetAddress.getByName("localhost");
+		clientIP = InetAddress.getByName("25.82.193.250");
+              
 	} catch (UnknownHostException e) {
                 System.out.println("ERROR: TextSender: Could not find client IP");
 		e.printStackTrace();

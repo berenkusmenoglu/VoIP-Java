@@ -25,7 +25,7 @@ public class TextReceiverThread implements Runnable {
     }
 
     static DatagramSocket receiving_socket;
-    private NetworksCW.SocketType socketType = Type0;
+    private NetworksCW.SocketType socketType = Type1;
 
     public void start() {
         Thread thread = new Thread(this);
@@ -36,21 +36,21 @@ public class TextReceiverThread implements Runnable {
     public void run() {
 
         //Port to open socket on
-        int PORT = 8000;
+        int PORT = 55555;
 
         //Open a socket to receive from on port PORT
         try {
             switch (socketType) {
-                case Type0:
+                case Type1:
                     receiving_socket = new DatagramSocket(PORT);
                     break;
-                case Type1:
+                case Type2:
                     receiving_socket = new DatagramSocket2(PORT);
                     break;
-                case Type2:
+                case Type3:
                     receiving_socket = new DatagramSocket3(PORT);
                     break;
-                case Type3:
+                case Type4:
                     receiving_socket = new DatagramSocket4(PORT);
                     break;
 
@@ -70,7 +70,7 @@ public class TextReceiverThread implements Runnable {
                 //Receive a DatagramPacket (note that the string cant be more than 80 chars)
                 byte[] buffer = new byte[80];
                 DatagramPacket packet = new DatagramPacket(buffer, 0, 80);
-
+                System.out.println(new String(packet.getData()));
                 receiving_socket.receive(packet);
 
                 //Get a string from the byte buffer
@@ -94,3 +94,6 @@ public class TextReceiverThread implements Runnable {
 
     }
 }
+
+
+// 139.222.6.6

@@ -5,8 +5,9 @@ import Others.TextReceiverThread;
 import TransportLayer.VoiceSenderThread;
 import TransportLayer.VoiceReceiverThread;
 import AudioLayer.AudioManager;
+import VoIPLayer.VoIPManager;
 import java.io.IOException;
-import java.util.Arrays;
+import java.net.InetAddress;
 import java.util.Vector;
 import javax.sound.sampled.LineUnavailableException;
 import static networkscw.NetworksCW.SocketType.*;
@@ -22,16 +23,24 @@ public class NetworksCW {
     private static TextSenderThread sender;
     private static VoiceReceiverThread voiceReceiver;
     private static VoiceSenderThread voiceSender;
+    private static VoIPManager voipManager;
+
+    private static final int PORT = 8000;
+    private static InetAddress clientIP;
+
+  
+  
+   
 
     /**
      * For testing with different DataSockets.
      */
     public enum SocketType {
 
-        Type0,
         Type1,
         Type2,
-        Type3;
+        Type3,
+        Type4;
     }
 
     /* @param args the command line arguments
@@ -39,15 +48,16 @@ public class NetworksCW {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws LineUnavailableException, IOException {
-
-        ReadyThreads(Type0);
+      
+        ReadyThreads(Type3);
         //RecordingTest();
-        //RunVoiceThreads();
+        RunVoiceThreads();
         //RunTextThreads();
+        //RecordingTest();
+        //PacketTest(Type2,100);
+         
         
-        RecordingTest();
-        
-
+       
     }
 
     /**
@@ -56,6 +66,7 @@ public class NetworksCW {
     private static void RunVoiceThreads() {
         voiceReceiver.start();
         voiceSender.start();
+
     }
 
     /**
@@ -76,6 +87,7 @@ public class NetworksCW {
      * @param type
      */
     static void ReadyThreads(SocketType type) {
+        voipManager = new VoIPManager(type);          
 
         voiceReceiver = new VoiceReceiverThread(type);
         voiceSender = new VoiceSenderThread(type);
@@ -92,19 +104,19 @@ public class NetworksCW {
      */
     static void RecordingTest() throws LineUnavailableException, IOException {
         Vector<byte[]> recordedAudio = audioManager.RecordAudio(5);
-        //audioManager.PlayAudio(recordedAudio);
-    
+
         for (byte[] recordedAudio1 : recordedAudio) {
-            
+
             for (int i = 0; i < recordedAudio1.length; i++) {
-                     System.out.print(recordedAudio1[i]);
-               }
-            
-           System.out.println("\n");
-       
+                System.out.print(recordedAudio1[i]);
+            }
+
+            System.out.println("\n");
+
         }
-           
-           
+
     }
+
+ 
 
 }

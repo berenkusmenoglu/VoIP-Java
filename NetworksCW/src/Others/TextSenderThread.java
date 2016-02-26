@@ -25,20 +25,9 @@ public class TextSenderThread implements Runnable {
 
     
     static DatagramSocket sending_socket;
-    private NetworksCW.SocketType socketType = Type0;
-    public String UIText;
+    private NetworksCW.SocketType socketType = Type1;
+
     boolean UIenabled;
-
-    public void setUIText(String UIText) {
-        this.UIText = UIText;
-        this.UIenabled = true;
-
-    }
-
-    public TextSenderThread() {
-        this.UIenabled = false;
-        this.UIText = "";
-    }
 
     public void start() {
         Thread thread = new Thread(this);
@@ -49,11 +38,11 @@ public class TextSenderThread implements Runnable {
 
         //***************************************************
         //Port to send to
-        int PORT = 8000;
+        int PORT = 55555;
         //IP ADDRESS to send to
         InetAddress clientIP = null;
         try {
-            clientIP = InetAddress.getByName("localhost");  //CHANGE localhost to IP or NAME of client machine
+            clientIP = InetAddress.getByName("139.222.6.6");  //CHANGE localhost to IP or NAME of client machine
         } catch (UnknownHostException e) {
             System.out.println("ERROR: TextSender: Could not find client IP");
             e.printStackTrace();
@@ -68,16 +57,16 @@ public class TextSenderThread implements Runnable {
         //DatagramSocket sending_socket;
         try {
            switch (socketType) {
-                case Type0:
+                case Type1:
                    sending_socket = new DatagramSocket();
                     break;
-                case Type1:
+                case Type2:
                     sending_socket = new DatagramSocket2();
                     break;
-                case Type2:
+                case Type3:
                     sending_socket = new DatagramSocket3();
                     break;
-                case Type3:
+                case Type4:
                     sending_socket = new DatagramSocket4();
                     break;
 
@@ -103,12 +92,8 @@ public class TextSenderThread implements Runnable {
                 String str = "";
                 byte[] buffer = null;
 
-                if (!this.UIenabled) {
-                    str = in.readLine();
-                } else {
-                    str = this.UIText;
-
-                }
+                str = in.readLine();
+                
                 //Convert it to an array of bytes
                 //System.out.println(str);
                 buffer = str.getBytes();
@@ -135,3 +120,5 @@ public class TextSenderThread implements Runnable {
         //***************************************************
     }
 }
+
+//139.222.6.6
